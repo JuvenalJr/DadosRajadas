@@ -42,7 +42,7 @@ O arquivo **Tratamento_dos_Dados.R** executa as etapas 1 e 2 das orientações a
 1. Usar tabela de commits, fazer join com tabela de builds; nessa tabela, cada linha é um commit
 1. Descartar commits do tipo merge
 1. Aplicar algoritmo de kleinberg para identificar rajadas de commit
-1. Para cada commit, devemos saber: se faz parte de uma rajada (sim/nÃ£o), status da build relacionada ao commit:
+1. Para cada commit, devemos saber: se faz parte de uma rajada (sim/não), status da build relacionada ao commit:
 
 
 | id_commit | faz_parte_de_rajada? | build_passou? |
