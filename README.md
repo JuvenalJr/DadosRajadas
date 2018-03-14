@@ -12,7 +12,7 @@ Os arquivos **TravisData.RDS** e **CommitData.RDS** foram gerados pelo script **
 
 #### Arquivo principal
 
-O arquivo **Tratamento_dos_Dados.R** executa as etapas 1 e 2 das orientaÃ§Ãµes a partir dos bancos de dados TravisData.RDS e CommitData.RDS
+O arquivo **Tratamento_dos_Dados.R** executa as etapas 1 e 2 das orientações a partir dos bancos de dados TravisData.RDS e CommitData.RDS
 
 <hr>
 
@@ -39,7 +39,7 @@ O arquivo **Tratamento_dos_Dados.R** executa as etapas 1 e 2 das orientaÃ§Ãµ
 #### Orientações:
 
 1. Pegar tabela com build jobs e agrupar por build (se pelo menos um job falhar, considere que a build falhou)
-- Usar tabela de commits, fazer join com tabela de builds; nessa tabela, cada linha Ã© um commit
+- Usar tabela de commits, fazer join com tabela de builds; nessa tabela, cada linha é um commit
 - Descartar commits do tipo merge
 - Aplicar algoritmo de kleinberg para identificar rajadas de commit
 - Para cada commit, devemos saber: se faz parte de uma rajada (sim/nÃ£o), status da build relacionada ao commit:
