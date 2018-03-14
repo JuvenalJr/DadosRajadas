@@ -16,7 +16,7 @@ O arquivo **Tratamento_dos_Dados.R** executa as etapas 1 e 2 das orientaÃ§Ãµ
 
 <hr>
 
- #### DÃºvidas sobre as partes 3 e 4:
+ #### Dúvidas sobre as partes 3 e 4:
 
 ##### Parte 3:
 
@@ -32,11 +32,11 @@ O arquivo **Tratamento_dos_Dados.R** executa as etapas 1 e 2 das orientaÃ§Ãµ
 
 4.1 - Agrupar por projeto antes de rodar o algoritmo?
 
-4.2 - Qual valor deve ser usado como nÃ­vel de rajadas?
+4.2 - Qual valor deve ser usado como nível de rajadas?
 
 <hr>
 
-#### OrientaÃ§Ãµes:
+#### Orientações:
 
 1. Pegar tabela com build jobs e agrupar por build (se pelo menos um job falhar, considere que a build falhou)
 - Usar tabela de commits, fazer join com tabela de builds; nessa tabela, cada linha Ã© um commit
