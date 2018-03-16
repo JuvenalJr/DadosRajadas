@@ -7,15 +7,15 @@ CommitData <- readRDS('CommitData.RDS')
 ### selecionando colunas do TravisData
 TravisData <- TravisData %>% select(
           # Id da Build
-          "tr_build_id", 
+          tr_build_id, 
           # statud da build conforme instução 1
-          "build_successful",
+          build_successful,
           # id de todos os commits da Build
-          "git_all_built_commits",
+          git_all_built_commits,
           #nome do projeto
-          "gh_project_name",
+          gh_project_name,
           # id do commit que disparou a Build
-          "git_trigger_commit"
+          git_trigger_commit
                                     )
 
 
