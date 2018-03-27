@@ -132,7 +132,7 @@ proj.atual <- proj.atual %>%
             tr_build_id = n_distinct(tr_build_id)
 
                           ) 
-# o read mostra que, no projeto selecioado temos até...
+# o head mostra que, no projeto selecioado temos até...
 #... 10 commits com a mesma data
 head(arrange(proj.atual, desc(git_commit_id)), 10)
 
