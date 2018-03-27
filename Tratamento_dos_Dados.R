@@ -1,5 +1,7 @@
 library(dplyr)
 
+options(digits.secs=4)
+
 TravisData <- readRDS('TravisData.RDS')
 CommitData <- readRDS('CommitData.RDS')
 
@@ -18,7 +20,7 @@ TravisData <- TravisData %>% select(
           git_trigger_commit
                                     )
 
-
+str(CommitData$date)
 
 ########
 # instruções de programação
@@ -69,7 +71,7 @@ setnames(CommitData, old = c('project','sha'),
 # criando uma linha por commit no db TravisData_build
 
 library(tidyr) # unnest()
-library(lubridate) # ymd_hms()
+#library(lubridate) # ymd_hms()
 
 TravisCommits <- TravisData_build %>%
   
@@ -80,21 +82,66 @@ TravisCommits <- TravisData_build %>%
   # juntando os datasets
   inner_join(CommitData, by = c("git_commit_id", "gh_project_name"))  %>% 
   # tratndo datas dos commits como objeto do pacote lubridate
-  mutate(date = ymd_hms(date))
+  mutate(date = as.POSIXct(date,format = "%Y-%m-%d  %H:%M:%OS") )
 
+#testando comits duplicados
+
+any(duplicated(TravisCommits$git_commit_id))
 ######## 3 - Descartar commits do tipo merge
 
-# Duvidas:
-# 3.1 - Como descartar os commits do tipo merge?
-# 3.1.1 - No final devemos ter apenas um commit por build, ou podem ser mais de um?
-# 3.1.2 - Caso seja apenas um, seria o commit mais recente da build, o mais antigo ou o commit que disparou a build?
-# 3.1.3 - caso seja mais de um, como diferenciar um merge commit de um commit em uma Build? Eles teriam a mesma data e hms?
 
 ######## 4 - Algoritmo de Kleinberg
 
-# Duvidas:
-# 4.1 - Agrupar por projeto antes de rodar o algoritmo?
-# 4.2 - Qual valor deve ser usado como nível de rajadas?
+library(bursts)
+
+# Crinado serie com os nomes dos projetos
+projetos <- unique(TravisCommits$gh_project_name)
+
+# selecionado projetos para teste
+# comente para selecionar todos os projetos
+#projetos <- projetos[c(1,5)]
+
+
+# selecionado primeiro projeto
+#comentar para selecionar todos os projetos
+proj.atual <- TravisCommits %>% filter(gh_project_name == projetos[1])
+
+### problema:
+### O algoritmo de kleinberg apresenta erro...
+#... quando duas ou mais datas são conhecidentes
+# rode a lina a baixo para testar
+k <- kleinberg(proj.atual$date)
+### mensagem de erro:
+#Error in kleinberg(proj.atual$date) : 
+#Input cannot contain events with zero time between!
+
+
+#agrupando dados para examinar commits com a mesma data
+proj.atual <- proj.atual %>%
+  group_by(date, add = TRUE) %>%
+  
+  summarise(commits = n_distinct(commits),
+            
+           git_commit_id = n_distinct(git_commit_id),
+            
+            build_successful = if_else( any(build_successful == FALSE), 
+                                        FALSE, TRUE),
+            
+            gh_project_name = unique(gh_project_name),
+            
+            tr_build_id = n_distinct(tr_build_id)
+
+                          ) 
+# o read mostra que, no projeto selecioado temos até...
+#... 10 commits com a mesma data
+head(arrange(proj.atual, desc(git_commit_id)), 10)
+
+#ordenando por tr_build temos um commit com até 7 builds
+head(arrange(proj.atual, desc(tr_build_id)), 10)
+
+
+# Duvida:
+# 4.1 - Como tratar esses dados?
 
 ######## 5 - Para cada commit: rajada(T/F), status(T/F)
   
