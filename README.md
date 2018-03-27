@@ -30,9 +30,19 @@ O arquivo **Tratamento_dos_Dados.R** executa as etapas 1 e 2 das orientações a
 
  ##### Parte 4:
 
-4.1 - Agrupar por projeto antes de rodar o algoritmo?
+4.1 problema:
+O algoritmo de kleinberg apresenta erro quando duas ou mais datas são conhecidentes
 
-4.2 - Qual valor deve ser usado como nível de rajadas?
+#### mensagem de erro:
+Error in kleinberg(proj.atual$date) : 
+Input cannot contain events with zero time between!
+
+4.2 Agrupando por data, temos até 10 commits com a mesma data para o projeto selecionado.
+4.3 ordenando por Build vamos casos onde um commit aparece em mais de uma build
+
+#### Duvida:
+ como tratar esses dados?
+
 
 <hr>
 
