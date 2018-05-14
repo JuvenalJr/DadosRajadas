@@ -104,44 +104,48 @@ projetos <- unique(TravisCommits$gh_project_name)
 
 # selecionado primeiro projeto
 #comentar para selecionar todos os projetos
-proj.atual <- TravisCommits %>% filter(gh_project_name == projetos[1])
+proj.atual <- TravisCommits %>% filter(gh_project_name == projetos[3])
 
-### problema:
-### O algoritmo de kleinberg apresenta erro...
-#... quando duas ou mais datas são conhecidentes
-# rode a lina a baixo para testar
+# Adiciona um tempo aleatório entre 0 e 1 segundo para evitar registros com data igual,
+# que impediriam o funcionamento do algoritmo de Kleinberg
+proj.atual.old <- proj.atual
+proj.atual <- proj.atual.old %>%
+  group_by(date) %>%
+  mutate(date2 = date + runif(n())) %>%
+  ungroup() %>%
+  select(-date) %>%
+  rename(date = date2)
+
+
 k <- kleinberg(proj.atual$date)
-### mensagem de erro:
-#Error in kleinberg(proj.atual$date) : 
-#Input cannot contain events with zero time between!
 
-
-#agrupando dados para examinar commits com a mesma data
-proj.atual <- proj.atual %>%
-  group_by(date, add = TRUE) %>%
-  
-  summarise(commits = n_distinct(commits),
-            
-           git_commit_id = n_distinct(git_commit_id),
-            
-            build_successful = if_else( any(build_successful == FALSE), 
-                                        FALSE, TRUE),
-            
-            gh_project_name = unique(gh_project_name),
-            
-            tr_build_id = n_distinct(tr_build_id)
-
-                          ) 
-# o head mostra que, no projeto selecioado temos até...
-#... 10 commits com a mesma data
-head(arrange(proj.atual, desc(git_commit_id)), 10)
-
-#ordenando por tr_build temos um commit com até 7 builds
-head(arrange(proj.atual, desc(tr_build_id)), 10)
-
-
-# Duvida:
-# 4.1 - Como tratar esses dados?
+plot(k)
 
 ######## 5 - Para cada commit: rajada(T/F), status(T/F)
-  
+
+# nível escolhido
+kLevel = 2
+
+k <- subset(k, level == kLevel)
+# ordenando os breaks
+breaks = sort(c(k$start, k$end))
+# criando variavel logica isBurst
+# se o commit pertence a um brust <- TRUE se não <- FALSE
+proj.atual <- proj.atual %>%
+  mutate(isBurst = cut(date, breaks=breaks, labels=FALSE)) %>%
+  mutate(isBurst = if_else(is.na(isBurst), F, isBurst %% 2 == 1))
+
+proj.builds <- proj.atual %>% 
+  group_by(tr_build_id) %>% 
+  summarise(  
+    build_successful = unique(build_successful),
+    # se ao menos um dos commits é rajada, a build e considerada rajada
+    isBurst = any(isBurst),
+    burst_passed = build_successful & isBurst,
+    gh_project_name = unique(gh_project_name)
+  )
+
+tab <- xtabs(~ isBurst + build_successful, data=proj.builds)
+tab
+mosaicplot(tab, shade=T)
+chisq.test(tab)
