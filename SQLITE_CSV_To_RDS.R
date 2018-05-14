@@ -1,13 +1,13 @@
 library(RSQLite)
 
-TravisData <- read.csv("Dadosquali/travistorrent_8_2_2017.csv",header = TRUE ,sep = ",")
+TravisData <- read.csv("travistorrent_8_2_2017.csv",header = TRUE ,sep = ",")
 
 # Transformando fatores em strings
 i <- sapply(TravisData, is.factor)
 TravisData[i] <- lapply(TravisData[i], as.character)
 
 # conectando banco de dados sqlite
-db <- dbConnect(SQLite(), dbname ="Dadosquali/commits.sqlite" )
+db <- dbConnect(SQLite(), dbname ="commits.sqlite" )
 
 #lista de dataframes no banco de dados
 dbListTables(db)
