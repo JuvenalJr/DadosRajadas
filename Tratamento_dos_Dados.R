@@ -101,10 +101,18 @@ projetos <- unique(TravisCommits$gh_project_name)
 # comente para selecionar todos os projetos
 #projetos <- projetos[c(1,5)]
 
+# nível escolhido
+kLevel = 2
 
+#data frame vazio para amrmazenar os resultados de todos os projetos
+total.builds <- data.frame()
+
+
+####### loop for
+for(i in 1:length(projetos)){
 # selecionado primeiro projeto
 #comentar para selecionar todos os projetos
-proj.atual <- TravisCommits %>% filter(gh_project_name == projetos[3])
+proj.atual <- TravisCommits %>% filter(gh_project_name == projetos[i])
 
 # Adiciona um tempo aleatório entre 0 e 1 segundo para evitar registros com data igual,
 # que impediriam o funcionamento do algoritmo de Kleinberg
@@ -123,8 +131,6 @@ plot(k)
 
 ######## 5 - Para cada commit: rajada(T/F), status(T/F)
 
-# nível escolhido
-kLevel = 2
 
 k <- subset(k, level == kLevel)
 # ordenando os breaks
@@ -144,8 +150,15 @@ proj.builds <- proj.atual %>%
     burst_passed = build_successful & isBurst,
     gh_project_name = unique(gh_project_name)
   )
+total.builds <- rbind( total.builds ,proj.builds)
 
-tab <- xtabs(~ isBurst + build_successful, data=proj.builds)
+}
+###### fim do loop for
+
+# montando tabela
+tab <- xtabs(~ isBurst + build_successful, data=total.builds)
 tab
+# plotando resultados
 mosaicplot(tab, shade=T)
+# teste qui-quadrado
 chisq.test(tab)
