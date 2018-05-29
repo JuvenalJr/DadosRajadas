@@ -10,7 +10,7 @@ CommitData <- readRDS('CommitData.RDS')
 TravisData <- TravisData %>% select(
           # Id da Build
           tr_build_id, 
-          # statud da build conforme instução 1
+          # statud da build conforme instuÃ§Ã£o 1
           build_successful,
           # id de todos os commits da Build
           git_all_built_commits,
@@ -23,13 +23,13 @@ TravisData <- TravisData %>% select(
 str(CommitData$date)
 
 ########
-# instruções de programação
+# instruÃ§Ãµes de programaÃ§Ã£o
 ########
 # 1 - Pegar tabela com build jobs e agrupar por build (se pelo menos um job falhar, considere que a build falhou)
-# 2 - Usar tabela de commits, fazer join com tabela de builds; nessa tabela, cada linha é um commit
+# 2 - Usar tabela de commits, fazer join com tabela de builds; nessa tabela, cada linha Ã© um commit
 # 3 - Descartar commits do tipo merge
 # 4 - Aplicar algoritmo de kleinberg para identificar rajadas de commit
-# 5 - Para cada commit, devemos saber: se faz parte de uma rajada (sim/não), status da build relacionada ao commit:
+# 5 - Para cada commit, devemos saber: se faz parte de uma rajada (sim/nÃ£o), status da build relacionada ao commit:
 ########
 
 ######## 1- Agrupando por build
@@ -99,10 +99,9 @@ projetos <- unique(TravisCommits$gh_project_name)
 
 # selecionado projetos para teste
 # comente para selecionar todos os projetos
-#projetos <- projetos[c(1,5)]
+projetos <- projetos[c(1,5)]
 
-# nível escolhido
-kLevel = 2
+
 
 #data frame vazio para amrmazenar os resultados de todos os projetos
 total.builds <- data.frame()
@@ -114,7 +113,9 @@ for(i in 1:length(projetos)){
 #comentar para selecionar todos os projetos
 proj.atual <- TravisCommits %>% filter(gh_project_name == projetos[i])
 
-# Adiciona um tempo aleatório entre 0 e 1 segundo para evitar registros com data igual,
+cat('projeto atual: ',projetos[i],'\n')
+
+# Adiciona um tempo aleatÃ³rio entre 0 e 1 segundo para evitar registros com data igual,
 # que impediriam o funcionamento do algoritmo de Kleinberg
 proj.atual.old <- proj.atual
 proj.atual <- proj.atual.old %>%
@@ -127,16 +128,19 @@ proj.atual <- proj.atual.old %>%
 
 k <- kleinberg(proj.atual$date)
 
-plot(k)
+# grafico de rajadas para o projeto atual
+#plot(k)
+cat('numero de niveis ', length(k),'\n')
+# nivel escolhido
+kLevel = 2
 
 ######## 5 - Para cada commit: rajada(T/F), status(T/F)
-
 
 k <- subset(k, level == kLevel)
 # ordenando os breaks
 breaks = sort(c(k$start, k$end))
 # criando variavel logica isBurst
-# se o commit pertence a um brust <- TRUE se não <- FALSE
+# se o commit pertence a um brust <- TRUE se nÃ£o <- FALSE
 proj.atual <- proj.atual %>%
   mutate(isBurst = cut(date, breaks=breaks, labels=FALSE)) %>%
   mutate(isBurst = if_else(is.na(isBurst), F, isBurst %% 2 == 1))
@@ -145,7 +149,7 @@ proj.builds <- proj.atual %>%
   group_by(tr_build_id) %>% 
   summarise(  
     build_successful = unique(build_successful),
-    # se ao menos um dos commits é rajada, a build e considerada rajada
+    # se ao menos um dos commits Ã© rajada, a build e considerada rajada
     isBurst = any(isBurst),
     burst_passed = build_successful & isBurst,
     gh_project_name = unique(gh_project_name)
