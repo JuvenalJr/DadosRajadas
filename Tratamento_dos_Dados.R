@@ -130,7 +130,7 @@ k <- kleinberg(proj.atual$date)
 
 # grafico de rajadas para o projeto atual
 #plot(k)
-cat('numero de niveis ', length(k),'\n')
+cat('numero de niveis ', nrow(k),'\n')
 # nivel escolhido
 kLevel = 2
 
