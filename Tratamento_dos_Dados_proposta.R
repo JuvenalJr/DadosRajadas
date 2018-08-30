@@ -2,9 +2,9 @@ library(dplyr)
 
 options(digits.secs=4)
 
-TravisData <- readRDS('C:\\Users\\junio\\OneDrive\\Documentos\\R\\TravisData.RDS')
+TravisData <- readRDS('TravisData.RDS')
 
-CommitData <- readRDS('C:\\Users\\junio\\OneDrive\\Documentos\\R\\CommitData.RDS')
+CommitData <- readRDS('CommitData.RDS')
 
 
 ### selecionando colunas do TravisData
@@ -100,10 +100,7 @@ projetos <- unique(TravisCommits$gh_project_name)
 
 # selecionado projetos para teste
 # comente para selecionar todos os projetos
-projetos <- projetos[c(1,5)]
-
-
-leveis <- c(1,2,3)
+projetos <- projetos[c(2,5)]
 
 #data frame vazio para amrmazenar os resultados de todos os projetos
 total.builds <- data.frame()
@@ -138,38 +135,83 @@ for(i in 1:length(projetos)){
   cat('numero de niveis ', nrow(unique(k[1])),'\n')
   # nivel escolhido
   #kLevel = 2
-  leveis[1] <- nrow(unique(k[1]))/4
-  leveis[2] <-(2*nrow(unique(k[1]))) /4
-  leveis[3] <-(3*nrow(unique(k[1]))) /4
+  # leveis[1] <- round(quantile(1:nrow(unique(k[1])), 0.25))
+  # leveis[2] <- round(quantile(1:nrow(unique(k[1])), 0.50))
+  # leveis[3] <- round(quantile(1:nrow(unique(k[1])), 0.75))
+  leveis = c(2, 3, 4)
   ######## 5 - Para cada commit: rajada(T/F), status(T/F)
   
-  k <- subset(k, level == leveis)
+  k2 <- subset(k, level == leveis[1])
   # ordenando os breaks
-  breaks = sort(c(k$start, k$end))
+  breaks = sort(c(k2$start, k2$end))
   # criando variavel logica isBurst
   # se o commit pertence a um brust <- TRUE se não <- FALSE
   proj.atual <- proj.atual %>%
-    mutate(isBurst = cut(date, breaks=breaks, labels=FALSE)) %>%
-    mutate(isBurst = if_else(is.na(isBurst), F, isBurst %% 2 == 1))
+    mutate(isBurst1 = cut(date, breaks=breaks, labels=FALSE)) %>%
+    mutate(isBurst1 = if_else(is.na(isBurst1), F, isBurst1 %% 2 == 1))
+  
+  k2 <- subset(k, level == leveis[2])
+  # ordenando os breaks
+  breaks = sort(c(k2$start, k2$end))
+  # criando variavel logica isBurst
+  # se o commit pertence a um brust <- TRUE se não <- FALSE
+  proj.atual <- proj.atual %>%
+    mutate(isBurst2 = cut(date, breaks=breaks, labels=FALSE)) %>%
+    mutate(isBurst2 = if_else(is.na(isBurst2), F, isBurst2 %% 2 == 1))
+  
+  k2 <- subset(k, level == leveis[3])
+  # ordenando os breaks
+  breaks = sort(c(k2$start, k2$end))
+  # criando variavel logica isBurst
+  # se o commit pertence a um brust <- TRUE se não <- FALSE
+  proj.atual <- proj.atual %>%
+    mutate(isBurst3 = cut(date, breaks=breaks, labels=FALSE)) %>%
+    mutate(isBurst3 = if_else(is.na(isBurst3), F, isBurst3 %% 2 == 1))
   
   proj.builds <- proj.atual %>% 
     group_by(tr_build_id) %>% 
     summarise(  
       build_successful = unique(build_successful),
       # se ao menos um dos commits é rajada, a build e considerada rajada
-      isBurst = any(isBurst),
-      burst_passed = build_successful & isBurst,
+      isBurst1 = any(isBurst1),
+      isBurst2 = any(isBurst2),
+      isBurst3 = any(isBurst3),
+      #burst_passed = build_successful & isBurst,
       gh_project_name = unique(gh_project_name)
     )
+  
+  tab <- xtabs(~ isBurst1 + build_successful, data=proj.builds)
+  tab
+  mosaicplot(tab, shade=T)
+  chisq.test(tab)
+  
+  tab <- xtabs(~ isBurst2 + build_successful, data=proj.builds)
+  tab
+  mosaicplot(tab, shade=T)
+  chisq.test(tab)
+  
+  tab <- xtabs(~ isBurst3 + build_successful, data=proj.builds)
+  tab
+  mosaicplot(tab, shade=T)
+  chisq.test(tab)
+  
+  
   total.builds <- rbind( total.builds ,proj.builds)
   
 }
 ###### fim do loop for
 
-# montando tabela
-tab <- xtabs(~ isBurst + build_successful, data=total.builds)
+tab <- xtabs(~ isBurst1 + build_successful, data=total.builds)
 tab
-# plotando resultados
 mosaicplot(tab, shade=T)
-# teste qui-quadrado
+chisq.test(tab)
+
+tab <- xtabs(~ isBurst2 + build_successful, data=total.builds)
+tab
+mosaicplot(tab, shade=T)
+chisq.test(tab)
+
+tab <- xtabs(~ isBurst3 + build_successful, data=total.builds)
+tab
+mosaicplot(tab, shade=T)
 chisq.test(tab)
