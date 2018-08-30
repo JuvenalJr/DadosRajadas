@@ -2,23 +2,24 @@ library(dplyr)
 
 options(digits.secs=4)
 
-TravisData <- readRDS('TravisData.RDS')
-CommitData <- readRDS('CommitData.RDS')
+TravisData <- readRDS('C:\\Users\\junio\\OneDrive\\Documentos\\R\\TravisData.RDS')
+
+CommitData <- readRDS('C:\\Users\\junio\\OneDrive\\Documentos\\R\\CommitData.RDS')
 
 
 ### selecionando colunas do TravisData
 TravisData <- TravisData %>% select(
-          # Id da Build
-          tr_build_id, 
-          # statud da build conforme instução 1
-          build_successful,
-          # id de todos os commits da Build
-          git_all_built_commits,
-          #nome do projeto
-          gh_project_name,
-          # id do commit que disparou a Build
-          git_trigger_commit
-                                    )
+  # Id da Build
+  tr_build_id, 
+  # statud da build conforme instução 1
+  build_successful,
+  # id de todos os commits da Build
+  git_all_built_commits,
+  #nome do projeto
+  gh_project_name,
+  # id do commit que disparou a Build
+  git_trigger_commit
+)
 
 str(CommitData$date)
 
@@ -35,38 +36,38 @@ str(CommitData$date)
 ######## 1- Agrupando por build
 
 TravisData_build <- TravisData %>%
-
-
+  
+  
   #agrupando
   group_by(tr_build_id) %>%
   
-    summarise(
+  summarise(
     
-      # Status da build:
-      # Se falhou para qualquer job = FALSE
-      # else = TRUE
-      build_successful = if_else( any(build_successful == FALSE), 
-                                  FALSE, TRUE),
+    # Status da build:
+    # Se falhou para qualquer job = FALSE
+    # else = TRUE
+    build_successful = if_else( any(build_successful == FALSE), 
+                                FALSE, TRUE),
     
-      # identificador de todos os commits da build
-      commits = unique(git_all_built_commits),
-      
-      # identificador do commit gatilho
-      git_trigger_commit= unique(git_trigger_commit),
+    # identificador de todos os commits da build
+    commits = unique(git_all_built_commits),
     
-      # Nome do projeto
-      gh_project_name = unique(gh_project_name)
-      
+    # identificador do commit gatilho
+    git_trigger_commit= unique(git_trigger_commit),
+    
+    # Nome do projeto
+    gh_project_name = unique(gh_project_name)
+    
   )
-  
+
 ######## 2 - join build commit
 
 # renomeando colunas do dataset Commits
 
 library(data.table) #setnames
 setnames(CommitData, old = c('project','sha'), 
-                     new = c('gh_project_name','git_commit_id')
-        )
+         new = c('gh_project_name','git_commit_id')
+)
 
 # criando uma linha por commit no db TravisData_build
 
@@ -99,9 +100,10 @@ projetos <- unique(TravisCommits$gh_project_name)
 
 # selecionado projetos para teste
 # comente para selecionar todos os projetos
-# projetos <- projetos[c(1,5)]
+projetos <- projetos[c(1,5)]
 
 
+leveis <- c(1,2,3)
 
 #data frame vazio para amrmazenar os resultados de todos os projetos
 total.builds <- data.frame()
@@ -109,53 +111,58 @@ total.builds <- data.frame()
 
 ####### loop for
 for(i in 1:length(projetos)){
-# selecionado primeiro projeto
-#comentar para selecionar todos os projetos
-proj.atual <- TravisCommits %>% filter(gh_project_name == projetos[i])
-
-cat('projeto atual: ',projetos[i],'\n')
-
-# Adiciona um tempo aleatório entre 0 e 1 segundo para evitar registros com data igual,
-# que impediriam o funcionamento do algoritmo de Kleinberg
-proj.atual.old <- proj.atual
-proj.atual <- proj.atual.old %>%
-  group_by(date) %>%
-  mutate(date2 = date + runif(n())) %>%
-  ungroup() %>%
-  select(-date) %>%
-  rename(date = date2)
-
-
-k <- kleinberg(proj.atual$date)
-
-# grafico de rajadas para o projeto atual
-#plot(k)
-cat('numero de niveis ', nrow(k),'\n')
-# nivel escolhido
-kLevel = 2
-
-######## 5 - Para cada commit: rajada(T/F), status(T/F)
-
-k <- subset(k, level == kLevel)
-# ordenando os breaks
-breaks = sort(c(k$start, k$end))
-# criando variavel logica isBurst
-# se o commit pertence a um brust <- TRUE se não <- FALSE
-proj.atual <- proj.atual %>%
-  mutate(isBurst = cut(date, breaks=breaks, labels=FALSE)) %>%
-  mutate(isBurst = if_else(is.na(isBurst), F, isBurst %% 2 == 1))
-
-proj.builds <- proj.atual %>% 
-  group_by(tr_build_id) %>% 
-  summarise(  
-    build_successful = unique(build_successful),
-    # se ao menos um dos commits é rajada, a build e considerada rajada
-    isBurst = any(isBurst),
-    burst_passed = build_successful & isBurst,
-    gh_project_name = unique(gh_project_name)
-  )
-total.builds <- rbind( total.builds ,proj.builds)
-
+  # selecionado primeiro projeto
+  #comentar para selecionar todos os projetos
+    proj.atual <- TravisCommits %>% filter(gh_project_name == projetos[i])
+  
+  cat('projeto atual: ',projetos[i],'\n')
+  
+  # Adiciona um tempo aleatório entre 0 e 1 segundo para evitar registros com data igual,
+  # que impediriam o funcionamento do algoritmo de Kleinberg
+  proj.atual.old <- proj.atual
+  proj.atual <- proj.atual.old %>%
+    group_by(date) %>%
+    mutate(date2 = date + runif(n())) %>%
+    ungroup() %>%
+    select(-date) %>%
+    rename(date = date2)
+  
+  
+  k <- kleinberg(proj.atual$date)
+ # if(nrow(k)>10){
+    
+  #}
+  
+  # grafico de rajadas para o projeto atual
+  #plot(k)
+  cat('numero de niveis ', nrow(unique(k[1])),'\n')
+  # nivel escolhido
+  #kLevel = 2
+  leveis[1] <- nrow(unique(k[1]))/4
+  leveis[2] <-(2*nrow(unique(k[1]))) /4
+  leveis[3] <-(3*nrow(unique(k[1]))) /4
+  ######## 5 - Para cada commit: rajada(T/F), status(T/F)
+  
+  k <- subset(k, level == leveis)
+  # ordenando os breaks
+  breaks = sort(c(k$start, k$end))
+  # criando variavel logica isBurst
+  # se o commit pertence a um brust <- TRUE se não <- FALSE
+  proj.atual <- proj.atual %>%
+    mutate(isBurst = cut(date, breaks=breaks, labels=FALSE)) %>%
+    mutate(isBurst = if_else(is.na(isBurst), F, isBurst %% 2 == 1))
+  
+  proj.builds <- proj.atual %>% 
+    group_by(tr_build_id) %>% 
+    summarise(  
+      build_successful = unique(build_successful),
+      # se ao menos um dos commits é rajada, a build e considerada rajada
+      isBurst = any(isBurst),
+      burst_passed = build_successful & isBurst,
+      gh_project_name = unique(gh_project_name)
+    )
+  total.builds <- rbind( total.builds ,proj.builds)
+  
 }
 ###### fim do loop for
 
