@@ -1,0 +1,47 @@
+---
+title: "r1"
+output: html_document
+---
+
+```{r setup, include=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(tidyr)
+library(data.table)
+
+load("./DadosAnalise.RData")
+
+```
+
+## Detecção de Rajadas
+
+
+```{r echo=FALSE}
+for (i in 1:length(projetos$gh_project_name) ) {
+  
+   cat("\n## ", as.character(projetos$gh_project_name[i]),"\n")
+  
+  aux<-total.builds %>% filter (gh_project_name == projetos$gh_project_name[i])
+  
+tab <- xtabs(~ isBurst1 + build_successful, data=aux)
+tab
+mosaicplot(tab, shade=T)
+print(chisq.test(tab))
+
+tab <- xtabs(~ isBurst2 + build_successful, data=aux)
+tab
+mosaicplot(tab, shade=T)
+print(chisq.test(tab))
+
+tab <- xtabs(~ isBurst3 + build_successful, data=aux)
+tab
+mosaicplot(tab, shade=T)
+print(chisq.test(tab))
+  
+}
+ 
+
+```
+
