@@ -54,7 +54,8 @@ TravisCommits <- TravisData_build %>%
   unnest(git_commit_id) %>% # juntando os datasets
   inner_join(CommitData, by = c("git_commit_id", "gh_project_name"))  %>% 
   # tratndo datas dos commits como objeto do pacote lubridate
-  mutate(date = as.POSIXct(date,format = "%Y-%m-%d  %H:%M:%OS") )
+  mutate(date = as.POSIXct(date,format = "%Y-%m-%d  %H:%M:%S") )%>%
+  filter(!is.na(date))
 
 TravisCommits<-TravisCommits%>% select(tr_build_id,build_successful,git_commit_id,gh_project_name,date,author_email)
 

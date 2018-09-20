@@ -21,25 +21,36 @@ load("./DadosAnalise.RData")
 ```{r echo=FALSE}
 for (i in 1:length(projetos$gh_project_name) ) {
   
-   cat("\n## ", as.character(projetos$gh_project_name[i]),"\n")
+ cat("\n## Resultados \n")
+  aux<-xtabs(~hipotese+nivel, data=resultadotestes2)
+  mosaicplot(ww, shade=T)
+  
+  cat("\n## ", as.character(projetos$gh_project_name[i]),"\n")
   
   aux<-total.builds %>% filter (gh_project_name == projetos$gh_project_name[i])
   
-tab <- xtabs(~ isBurst1 + build_successful, data=aux)
-tab
-mosaicplot(tab, shade=T)
-print(chisq.test(tab))
 
-tab <- xtabs(~ isBurst2 + build_successful, data=aux)
-tab
-mosaicplot(tab, shade=T)
-print(chisq.test(tab))
-
-tab <- xtabs(~ isBurst3 + build_successful, data=aux)
-tab
-mosaicplot(tab, shade=T)
-print(chisq.test(tab))
   
+  tab <- xtabs(~ isBurst1 + build_successful, data=aux)
+  tab
+    if(length(tab)>3){
+      mosaicplot(tab, shade=T)
+      print(chisq.test(tab))
+    }
+
+  tab <- xtabs(~ isBurst2 + build_successful, data=aux)
+  tab
+  if(length(tab)>3){
+    mosaicplot(tab, shade=T)
+    print(chisq.test(tab))
+  }
+
+  tab <- xtabs(~ isBurst3 + build_successful, data=aux)
+  tab
+  if(length(tab)>3){
+    mosaicplot(tab, shade=T)
+    print(chisq.test(tab))
+    }
 }
  
 
