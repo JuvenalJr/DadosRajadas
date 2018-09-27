@@ -19,15 +19,15 @@ x<-TravisCommits%>%
 
 projetos<-x %>% group_by(gh_project_name)%>%
   summarise(n_commits=max(n_commits),tempo=max(tempo))
-projetos<-projetos%>%filter(tempo>48&n_commits>100&n_commits<102)
+projetos<-projetos%>%filter(tempo>48&n_commits>100&n_commits<1000)
 
 
 #data frame vazio para amrmazenar os resultados de todos os projetos
 total.builds <- data.frame()
 
-
 ####### loop for
 for(i in 1:length(projetos$gh_project_name)){
+  print(i)
   rm(list=ls()[!ls()%in%c("i","x","projetos","total.builds")])
   # selecionado primeiro projeto
   #comentar para selecionar todos os projetos
@@ -79,6 +79,7 @@ for(i in 1:length(projetos$gh_project_name)){
     } else{
       proj.atual<-proj.atual%>% 
         mutate(pvalue1 = NA)
+      next
     } 
     
     
@@ -109,6 +110,7 @@ for(i in 1:length(projetos$gh_project_name)){
     } else{
       proj.atual<-proj.atual%>% 
         mutate(pvalue2 = NA)
+      next
     } 
     
     k2 <- subset(k, level == leveis[3])
@@ -137,6 +139,7 @@ for(i in 1:length(projetos$gh_project_name)){
     } else{
       proj.atual<-proj.atual%>% 
         mutate(pvalue3 = NA)
+      next
     }  
     
     proj.builds <- proj.atual %>% 
