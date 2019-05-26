@@ -1,3 +1,13 @@
+### Ordem da Leitura dos Arquivos no R
+
+ 1- Leitura
+ 
+ 2- Tratamento dos dados
+ 
+ 3- Análise
+ 
+ 4- Resultados
+
 # Rajadas Builds
 
 <hr>
