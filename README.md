@@ -2,11 +2,16 @@
 
  1- Leitura.R
  
- 2- Tratamento_dos_Dados_proposta.R
+   1.1- Faz a leitura da base de dados selecionando as variáveis a serem trabalhadas
+   
+ 2-Análise.R
+  
+   2.1- Faz a leitura da base de dados salva da "leitura" acima, roda o kleinberg e gera graficos para os níveis 1,2 e 3
  
- 3- Análise.R
+
+ 3- Resultados.R
  
- 4- Resultados.R
+   3.1- Gera graficos dos projetos estatisticamente significativos e calcula tamanho do efeito. 
 
 # Rajadas Builds
 
