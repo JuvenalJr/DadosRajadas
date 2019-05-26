@@ -1,12 +1,12 @@
 ### Ordem da Leitura dos Arquivos no R
 
- 1- Leitura
+ 1- Leitura.R
  
- 2- Tratamento dos dados
+ 2- Tratamento_dos_Dados_proposta.R
  
- 3- Análise
+ 3- Análise.R
  
- 4- Resultados
+ 4- Resultados.R
 
 # Rajadas Builds
 
