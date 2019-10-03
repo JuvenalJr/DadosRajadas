@@ -1,0 +1,92 @@
+---
+title: "r2"
+output: html_document
+---
+
+```{r setup, include=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(tidyr)
+library(data.table)
+
+load("./DadosAnalise.RData")
+
+```
+
+## Detecção de Rajadas
+
+
+```{r echo=FALSE}
+
+ cat("\n## Resultados por nivel e linguagem \n")
+  aux<-xtabs( ~ gh_lang+hipotese+nivel, data=resultadotestes2)
+  mosaicplot(aux, shade=T)
+  
+cat("\n## Resultados - Java nivel 1\n")
+  aux <- resultadotestes2 %>% filter(nivel == "nivel 1" & gh_lang=="java") %>%
+    select(hipotese)%>%
+    group_by(hipotese) %>%
+    mutate(n=n())%>%
+    group_by(hipotese) %>%
+    summarise(n=unique(n))
+  pie(aux$n,labels = aux$hipotese,main = "Java nivel 1")
+  
+cat("\n## Resultados - Java nivel 2\n")
+  aux <- resultadotestes2 %>% filter(nivel == "nivel 2" & gh_lang=="java") %>%
+    select(hipotese)%>%
+    group_by(hipotese) %>%
+    mutate(n=n())%>%
+    group_by(hipotese) %>%
+    summarise(n=unique(n))
+  pie(aux$n,labels = aux$hipotese,main = "Java nivel 2")
+  
+cat("\n## Resultados - Java nivel 3\n")
+  aux <- resultadotestes2 %>% filter(nivel == "nivel 3" & gh_lang=="java") %>%
+    select(hipotese)%>%
+    group_by(hipotese) %>%
+    mutate(n=n())%>%
+    group_by(hipotese) %>%
+    summarise(n=unique(n))
+   pie(aux$n,labels = aux$hipotese,main = "Java nivel 3")
+ 
+
+cat("\n## Resultados - Ruby nivel 1\n")
+  aux <- resultadotestes2 %>% filter(nivel == "nivel 1" & gh_lang=="ruby") %>%
+    select(hipotese)%>%
+    group_by(hipotese) %>%
+    mutate(n=n())%>%
+    group_by(n) %>%
+    summarise(hipotese=unique(hipotese))
+  pie(aux$n,labels = aux$hipotese,main = "Ruby nivel 1")
+  
+cat("\n## Resultados - Ruby nivel 2\n")
+  aux <- resultadotestes2 %>% filter(nivel == "nivel 2" & gh_lang=="ruby") %>%
+    select(hipotese)%>%
+    group_by(hipotese) %>%
+    mutate(n=n())%>%
+    group_by(hipotese) %>%
+    summarise(n=unique(n))
+  pie(aux$n,labels = aux$hipotese,main = "Ruby nivel 2")
+  
+cat("\n## Resultados - Ruby nivel 3\n")
+  aux <- resultadotestes2 %>% filter(nivel == "nivel 3" & gh_lang=="ruby") %>%
+    select(hipotese)%>%
+    group_by(hipotese) %>%
+    mutate(n=n())%>%
+    group_by(n) %>%
+    summarise(hipotese=unique(hipotese))
+   pie(aux$n,labels = aux$hipotese,main = "Ruby nivel 3")
+   
+   
+   
+ cat("\n## Anova linguagem vs trbuild vs isburst\n")
+ 
+ aux<-total.builds%>%select(build_successful,gh_lang,isBurst1)
+ aux2 <- glm(isBurst1 ~ build_successful + gh_lang, data= aux, family = poisson())
+ anova(aux2)
+summary(aux2)
+ 
+```
+

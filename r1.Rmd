@@ -20,7 +20,7 @@ load("./DadosAnalise.RData")
 
 ```{r echo=FALSE}
 for (i in 1:length(projetos$gh_project_name) ) {
-  
+#for (i in 1:5 ) {  
  cat("\n## Resultados \n")
   aux<-xtabs(~hipotese+nivel, data=resultadotestes2)
   mosaicplot(ww, shade=T)

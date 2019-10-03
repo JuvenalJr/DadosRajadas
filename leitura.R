@@ -16,7 +16,11 @@ TravisData <- TravisData %>% select(
   #nome do projeto
   gh_project_name,
   # id do commit que disparou a Build
-  git_trigger_commit
+  git_trigger_commit,
+  #linguagem
+  gh_lang,
+  #linhas
+  git_diff_src_churn
 )
 
 ######## 1- Agrupando por build
@@ -34,7 +38,11 @@ TravisData_build <- TravisData %>%
     # identificador do commit gatilho
     git_trigger_commit= unique(git_trigger_commit),
     # Nome do projeto
-    gh_project_name = unique(gh_project_name)
+    gh_project_name = unique(gh_project_name),
+    #linguagem
+    gh_lang=unique(gh_lang),
+    #linhas
+    git_diff_src_churn=max(git_diff_src_churn)
   )
 
 ######## 2 - join build commit
@@ -57,7 +65,7 @@ TravisCommits <- TravisData_build %>%
   mutate(date = as.POSIXct(date,format = "%Y-%m-%d  %H:%M:%S") )%>%
   filter(!is.na(date))
 
-TravisCommits<-TravisCommits%>% select(tr_build_id,build_successful,git_commit_id,gh_project_name,date,author_email)
+TravisCommits<-TravisCommits%>% select(tr_build_id,build_successful,git_commit_id,gh_project_name,date,author_email,gh_lang,git_diff_src_churn)
 
 save.image("./DadosRajadas.RData")
 

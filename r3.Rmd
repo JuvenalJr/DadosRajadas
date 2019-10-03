@@ -1,0 +1,66 @@
+---
+title: "r2"
+output: html_document
+---
+
+```{r setup, include=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(tidyr)
+library(data.table)
+
+load("./DadosAnalise.RData")
+
+```
+
+## Detecção de Rajadas
+
+
+```{r echo=FALSE}
+
+
+ cat("\n## gitdiffsrcchurn vs trbuild\n")
+
+
+ cat("\n## Resultados Gerais \n")
+ 
+  cat("\n## trbuild geral\n")
+
+aux<- total.builds%>%select(build_successful)%>%
+  group_by(build_successful)%>%
+  mutate(n=n())%>%
+  group_by(build_successful)%>%
+  summarise(n=unique(n))
+pie(aux$n, labels = aux$build_successful,main = "trbuild geral")
+
+boxplot(total.builds$build_successful, total.builds$git_diff_src_churn, xlab = "FALSE    trstatus   TRUE", ylab = "gitdiffsrcchurn",ylim = c(0, 100))
+
+ cat("\n## Resultados Java \n")
+ aux<- total.builds%>%filter(gh_lang=="java")%>%
+   select(build_successful)%>%
+  group_by(build_successful)%>%
+  mutate(n=n())%>%
+  group_by(build_successful)%>%
+  summarise(n=unique(n))
+pie(aux$n, labels = aux$build_successful,main = "trbuild java")
+
+ aux<-total.builds%>%filter(gh_lang=="java")
+ boxplot(aux$build_successful, aux$git_diff_src_churn, xlab = "FALSE    trstatus   TRUE", ylab = "gitdiffsrcchurn",ylim = c(0, 200))
+ 
+  cat("\n## Resultados Ruby \n")
+   aux<- total.builds%>%filter(gh_lang=="ruby")%>%
+   select(build_successful)%>%
+  group_by(build_successful)%>%
+  mutate(n=n())%>%
+  group_by(build_successful)%>%
+  summarise(n=unique(n))
+pie(aux$n, labels = aux$build_successful,main = "trbuild ruby")
+
+  aux<-total.builds%>%filter(gh_lang=="ruby")
+  boxplot(aux$build_successful, aux$git_diff_src_churn,  xlab = "FALSE    trstatus   TRUE", ylab = "gitdiffsrcchurn", ylim = c(0, 100))
+ 
+ 
+```
+

@@ -12,13 +12,13 @@ load("./DadosRajadas.RData")
 # Crinado serie com os nomes dos projetos
 x<-TravisCommits%>% 
   mutate(gh_project_name= gsub ("/"," ",gh_project_name))%>%
-  select(tr_build_id,build_successful,git_commit_id,gh_project_name,date,author_email)%>%
+  select(tr_build_id,build_successful,git_commit_id,gh_project_name,date,author_email, gh_lang,git_diff_src_churn)%>%
   group_by(gh_project_name)%>%
   mutate(n_commits = n(), tempo = difftime(max(as.POSIXct(date),na.rm=TRUE),min(as.POSIXct(date),na.rm=TRUE),units="weeks"))
 #projetos<-TravisCommits%>% select (gh_project_name)
 
 projetos<-x %>% group_by(gh_project_name)%>%
-  summarise(n_commits=max(n_commits),tempo=max(tempo))
+  summarise(n_commits=max(n_commits),tempo=max(tempo),gh_lang=max(gh_lang))
 projetos<-projetos%>%filter(tempo>48&n_commits>100&n_commits<1000)
 
 
@@ -26,7 +26,7 @@ projetos<-projetos%>%filter(tempo>48&n_commits>100&n_commits<1000)
 total.builds <- data.frame()
 
 ####### loop for
-for(i in 1:length(projetos$gh_project_name)){
+for(i in 2:length(projetos$gh_project_name)){
   print(i)
   rm(list=ls()[!ls()%in%c("i","x","projetos","total.builds")])
   # selecionado primeiro projeto
@@ -170,13 +170,17 @@ for(i in 1:length(projetos$gh_project_name)){
         tx_com_burst3 = max(tx_com_burst3),
         razao_com_sem_burst3 = max(razao_com_sem_burst3),
         #burst_passed = build_successful & isBurst,
-        gh_project_name = unique(gh_project_name)
+        gh_project_name = unique(gh_project_name),
+        gh_lang = unique(gh_lang),
+        git_diff_src_churn = max(git_diff_src_churn)
       )
     
     total.builds <- rbind( total.builds ,proj.builds)
   }
   
 }
+
+total.builds<- total.builds%>%filter(gh_lang!="javascript")
 
 resultadotestes<- total.builds%>%
   group_by(gh_project_name)%>%
@@ -196,15 +200,18 @@ resultadotestes<- total.builds%>%
             cramer3 = max(cramer3),
             tx_sem_burst3 = max(tx_sem_burst3),
             tx_com_burst3 = max(tx_com_burst3),
-            razao_com_sem_burst3 = max(razao_com_sem_burst3)
+            razao_com_sem_burst3 = max(razao_com_sem_burst3),
+            
+            gh_lang = unique(gh_lang),
+            git_diff_src_churn = max(git_diff_src_churn)
   )%>%
   mutate(nivel1 = if_else(pvalue1>=0.05,1,0),
          nivel2 = if_else(pvalue2>=0.05,1,0), 
          nivel3 = if_else(pvalue3>=0.05,1,0))
 
-aux1<-resultadotestes%>%select(nivel1)%>%mutate(nivel = "nivel 1",hipotese=nivel1)%>%select(nivel,hipotese)
-aux2<-resultadotestes%>%select(nivel2)%>%mutate(nivel = "nivel 2",hipotese=nivel2)%>%select(nivel,hipotese)
-aux3<-resultadotestes%>%select(nivel3)%>%mutate(nivel = "nivel 3",hipotese=nivel3)%>%select(nivel,hipotese)
+aux1<-resultadotestes%>%select(nivel1,gh_lang,git_diff_src_churn)%>%mutate(nivel = "nivel 1",hipotese=nivel1)%>%select(nivel,hipotese,gh_lang,git_diff_src_churn)
+aux2<-resultadotestes%>%select(nivel2,gh_lang,git_diff_src_churn)%>%mutate(nivel = "nivel 2",hipotese=nivel2)%>%select(nivel,hipotese,gh_lang,git_diff_src_churn)
+aux3<-resultadotestes%>%select(nivel3,gh_lang,git_diff_src_churn)%>%mutate(nivel = "nivel 3",hipotese=nivel3)%>%select(nivel,hipotese,gh_lang,git_diff_src_churn)
 
 resultadotestes2<-rbind(aux1,aux2,aux3)
 
