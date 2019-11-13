@@ -180,7 +180,7 @@ for(i in 2:length(projetos$gh_project_name)){
   
 }
 
-total.builds<- total.builds%>%filter(gh_lang!="javascript")
+otal.builds<- total.builds%>%filter(gh_lang!="javascript")
 
 resultadotestes<- total.builds%>%
   group_by(gh_project_name)%>%
@@ -223,4 +223,4 @@ rm(list=ls()[!ls()%in%c("x","projetos","total.builds","resultadotestes","resulta
 save.image("./DadosAnalise.RData")
 ###### fim do loop for
 
-
+#######################
