@@ -9,6 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(tidyr)
+library(vcd)
 library(data.table)
 
 load("./DadosAnalise.RData")
@@ -20,10 +21,17 @@ load("./DadosAnalise.RData")
 
 ```{r echo=FALSE}
 
- cat("\n## Resultados por nivel e linguagem \n")
-  aux<-xtabs( ~ gh_lang+hipotese+nivel, data=resultadotestes2)
+cat("\n## Resultados por nivel e linguagem \n")
+  aux<-xtabs( ~ gh_lang + hipotese, data=filter(resultadotestes2, nivel=="nivel 3"))
   mosaicplot(aux, shade=T)
-  
+
+ cat("\n## Resultados por nivel e linguagem \n")
+  aux<-xtabs( ~ gh_lang+hipotese, data=filter(resultadotestes2, nivel=="nivel 3"))
+  mosaicplot(aux, shade=T)
+  chisq.test(aux)
+```
+
+```{r echo=FALSE}
 cat("\n## Resultados - Java nivel 1\n")
   aux <- resultadotestes2 %>% filter(nivel == "nivel 1" & gh_lang=="java") %>%
     select(hipotese)%>%
@@ -32,7 +40,9 @@ cat("\n## Resultados - Java nivel 1\n")
     group_by(hipotese) %>%
     summarise(n=unique(n))
   pie(aux$n,labels = aux$hipotese,main = "Java nivel 1")
-  
+```
+
+```{r echo=FALSE}
 cat("\n## Resultados - Java nivel 2\n")
   aux <- resultadotestes2 %>% filter(nivel == "nivel 2" & gh_lang=="java") %>%
     select(hipotese)%>%
@@ -41,7 +51,9 @@ cat("\n## Resultados - Java nivel 2\n")
     group_by(hipotese) %>%
     summarise(n=unique(n))
   pie(aux$n,labels = aux$hipotese,main = "Java nivel 2")
-  
+```
+
+```{r echo=FALSE}
 cat("\n## Resultados - Java nivel 3\n")
   aux <- resultadotestes2 %>% filter(nivel == "nivel 3" & gh_lang=="java") %>%
     select(hipotese)%>%
@@ -50,8 +62,9 @@ cat("\n## Resultados - Java nivel 3\n")
     group_by(hipotese) %>%
     summarise(n=unique(n))
    pie(aux$n,labels = aux$hipotese,main = "Java nivel 3")
- 
+```
 
+```{r echo=FALSE}
 cat("\n## Resultados - Ruby nivel 1\n")
   aux <- resultadotestes2 %>% filter(nivel == "nivel 1" & gh_lang=="ruby") %>%
     select(hipotese)%>%
@@ -60,7 +73,9 @@ cat("\n## Resultados - Ruby nivel 1\n")
     group_by(n) %>%
     summarise(hipotese=unique(hipotese))
   pie(aux$n,labels = aux$hipotese,main = "Ruby nivel 1")
-  
+```
+
+```{r echo=FALSE}
 cat("\n## Resultados - Ruby nivel 2\n")
   aux <- resultadotestes2 %>% filter(nivel == "nivel 2" & gh_lang=="ruby") %>%
     select(hipotese)%>%
@@ -69,7 +84,9 @@ cat("\n## Resultados - Ruby nivel 2\n")
     group_by(hipotese) %>%
     summarise(n=unique(n))
   pie(aux$n,labels = aux$hipotese,main = "Ruby nivel 2")
-  
+```
+
+```{r echo=FALSE}
 cat("\n## Resultados - Ruby nivel 3\n")
   aux <- resultadotestes2 %>% filter(nivel == "nivel 3" & gh_lang=="ruby") %>%
     select(hipotese)%>%
@@ -78,15 +95,43 @@ cat("\n## Resultados - Ruby nivel 3\n")
     group_by(n) %>%
     summarise(hipotese=unique(hipotese))
    pie(aux$n,labels = aux$hipotese,main = "Ruby nivel 3")
-   
-   
-   
+```
+
+```{r echo=FALSE}
  cat("\n## Anova linguagem vs trbuild vs isburst\n")
  
  aux<-total.builds%>%select(build_successful,gh_lang,isBurst1)
- aux2 <- glm(isBurst1 ~ build_successful + gh_lang, data= aux, family = poisson())
- anova(aux2)
-summary(aux2)
- 
+ aux2 <- glm(build_successful ~ isBurst1 + gh_lang, data= aux, family = poisson())
+ # anova(aux2)
+ summary(aov(build_successful ~ isBurst1 * gh_lang, data= aux))
+# summary(aux2)
 ```
 
+## Rajada vs status da build
+
+Falta calcular o tamanho do efeito com o V de Cramer.
+
+```{r}
+aux<-xtabs(~ isBurst2 + build_successful, data=total.builds)
+mosaicplot(aux, shade=T)
+chisq.test(aux)
+```
+
+## Linguagem vs status da build
+
+Falta calcular o tamanho do efeito com o V de Cramer.
+
+```{r}
+aux<-xtabs(~ gh_lang + build_successful, data=total.builds)
+mosaicplot(aux, shade=T)
+chisq.test(aux)
+```
+
+# Linguagem vs rajada vs status da build
+
+```{r}
+aux<-xtabs(~ gh_lang + isBurst2 + build_successful, data=total.builds)
+mosaic(aux, shade=T, direction = "v")
+aux<-xtabs(~ build_successful + isBurst2 + gh_lang , data=total.builds)
+mantelhaen.test(aux)
+```
