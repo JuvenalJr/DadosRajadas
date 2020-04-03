@@ -1,3 +1,17 @@
+
+1. baixa-git-repos.R ==> pasta gitrepos
+2. extrai-git-logs.R ==> commits.rds
+3. calcula-git-bursts.R ==> bursts.rds
+4. identifica-bursty-commits.R ==> commits-bursts.rds
+
+1. processa-travis.R
+2. identifica-bursty-builds.R
+
+1. analisa.R
+
+-----------
+
+
 ###teste Ordem da Leitura dos Arquivos no R
 
  1- Leitura.R
